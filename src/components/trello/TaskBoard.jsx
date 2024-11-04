@@ -18,19 +18,19 @@ function TaskBoard() {
       return;
     }
 
-    // Clonar el estado actual de columnas para mantener inmutabilidad
+    // Clona el estado actual de las tareas para mantener inmutabilidad
     const sourceColumn = [...tasks[source.droppableId]];
-    console.log("sourceColumn", sourceColumn);
+    //console.log("sourceColumn", sourceColumn);
 
     const destColumn = source.droppableId === destination.droppableId
       ? sourceColumn
       : [...tasks[destination.droppableId]];
     console.log("destColumn", destColumn);
 
-    // Extraer la tarea movida de la columna de origen
+    // elimina la tarea que se movio de su columna de origne
     const [movedTask] = sourceColumn.splice(source.index, 1);
 
-    // Insertar la tarea en la nueva posición
+    // inserta la tarea en su nueva columna
     destColumn.splice(destination.index, 0, movedTask);
 
     // Actualizar el estado de columnas
