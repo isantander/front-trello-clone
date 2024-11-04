@@ -2,26 +2,12 @@
 import { DragDropContext } from "@hello-pangea/dnd";
 import Column from "./Column";
 import { useState } from "react";
-
-// Estado inicial organizado por columnas
-const initialColumns = {
-  pendiente: [
-    { id: "1", nombre: "Tarea 1", descripcion: "Descripción de la tarea 1" },
-    { id: "4", nombre: "Tarea 4", descripcion: "Descripción de la tarea 4" },
-  ],
-  proceso: [
-    { id: "2", nombre: "Tarea 2", descripcion: "Descripción de la tarea 2" },
-    { id: "5", nombre: "Tarea 5", descripcion: "Descripción de la tarea 5" },
-  ],
-  terminada: [
-    { id: "3", nombre: "Tarea 3", descripcion: "Descripción de la tarea 3" },
-    { id: "6", nombre: "Tarea 6", descripcion: "Descripción de la tarea 6" },
-  ],
-};
+import { useTasks } from "../../context/TasksContext";
 
 function TaskBoard() {
-  const [columns, setColumns] = useState(initialColumns);
-  console.log(columns);
+  //const [columns, setColumns] = useState(initialColumns);
+  const { tasks, setTasks } = useTasks();
+  console.log(tasks);
 
   const handleDragEnd = (result) => {
     const { source, destination } = result;
@@ -33,12 +19,12 @@ function TaskBoard() {
     }
 
     // Clonar el estado actual de columnas para mantener inmutabilidad
-    const sourceColumn = [...columns[source.droppableId]];
+    const sourceColumn = [...tasks[source.droppableId]];
     console.log("sourceColumn", sourceColumn);
 
     const destColumn = source.droppableId === destination.droppableId
       ? sourceColumn
-      : [...columns[destination.droppableId]];
+      : [...tasks[destination.droppableId]];
     console.log("destColumn", destColumn);
 
     // Extraer la tarea movida de la columna de origen
@@ -48,8 +34,8 @@ function TaskBoard() {
     destColumn.splice(destination.index, 0, movedTask);
 
     // Actualizar el estado de columnas
-    setColumns({
-      ...columns,
+    setTasks({
+      ...tasks,
       [source.droppableId]: sourceColumn,
       [destination.droppableId]: destColumn,
     });
@@ -60,8 +46,8 @@ function TaskBoard() {
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="min-h-screen flex justify-center items-center">            
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-5xl">
-          {Object.keys(columns).map((estado) => (
-            <Column key={estado} estado={estado} tasks={columns[estado]} />
+          {Object.keys(tasks).map((estado) => (
+            <Column key={estado} estado={estado} tasks={tasks[estado]} />
           ))}
         </div>
       </div>
