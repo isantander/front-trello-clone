@@ -17,11 +17,35 @@ const initialTask = {
 };
 const TasksContext = createContext();
 
+
 export const TasksProvider = ({ children }) => {
     const [tasks, setTasks] = useState(initialTask);
 
+      // Función para generar un nuevo ID
+    const generateId = () => {
+        // Convierte initialTask a un solo array
+        const allTasks = Object.values(tasks).flat(); 
+        // convierte los IDs de allTasks a números
+        const ids = allTasks.map(task => parseInt(task.id, 10));
+        // Usa Math.max para obtener el id alto
+        const maxId = Math.max(...ids); 
+        // devuelve el maxId + 1 y lo convierte en string, posteriormente el campo id será numérico
+        return (maxId + 1).toString(); 
+    };
+
+    // función para agregar una nueva tarea
+    const addTask = (category, newTask) => {
+        const taskWithId = { ...newTask, id: generateId() };
+
+        // prevTasks representa el estado actual de tasks
+        setTasks((prevTasks) => ({
+        ...prevTasks,
+        [category]: [...prevTasks[category], taskWithId],
+        }));
+    };
+
     return (
-        <TasksContext.Provider value={{ tasks, setTasks }}>
+        <TasksContext.Provider value={{ tasks, setTasks, addTask }}>
             {children}
         </TasksContext.Provider>
     );
