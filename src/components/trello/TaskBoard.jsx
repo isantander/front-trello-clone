@@ -1,58 +1,60 @@
-// TaskBoard.jsx
-import { DragDropContext } from "@hello-pangea/dnd";
-import Column from "./Column";
-import { useState } from "react";
-import { useTasks } from "../../context/TasksContext";
+import React from 'react';
+import { DragDropContext } from '@hello-pangea/dnd';
+import Column from './Column';
+import { useTaskContext } from '../../context/TasksContext';
 
-function TaskBoard() {
-  //const [columns, setColumns] = useState(initialColumns);
-  const { tasks, setTasks } = useTasks();
-  console.log(tasks);
+const estadosFijos = ["pendiente", "proceso", "terminada"]; // Estados predefinidos
+
+const TaskBoard = () => {
+  const { tasks, setTasks } = useTaskContext();
 
   const handleDragEnd = (result) => {
-    const { source, destination } = result;
-    console.log("source",source, "destination", destination); 
+    if (!result.destination) return;
 
-    // Validar si no hay destino o el destino es el mismo que el origen
-    if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+    const { source, destination } = result;
+
+    // Si no hay cambio de posición
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
       return;
     }
 
-    // Clona el estado actual de las tareas para mantener inmutabilidad
-    const sourceColumn = [...tasks[source.droppableId]];
-    //console.log("sourceColumn", sourceColumn);
+    setTasks((prevTasks) => {
+      // Crear copias separadas de las tareas por estado
+      const tasksByState = estadosFijos.reduce((acc, estado) => {
+        acc[estado] = prevTasks.filter((task) => task.estado === estado);
+        return acc;
+      }, {});
 
-    const destColumn = source.droppableId === destination.droppableId
-      ? sourceColumn
-      : [...tasks[destination.droppableId]];
-    console.log("destColumn", destColumn);
+      // Obtener la tarea que se está moviendo
+      const [movedTask] = tasksByState[source.droppableId].splice(source.index, 1);
 
-    // elimina la tarea que se movio de su columna de origne
-    const [movedTask] = sourceColumn.splice(source.index, 1);
+      // Actualizar el estado de la tarea si cambió de columna
+      if (source.droppableId !== destination.droppableId) {
+        movedTask.estado = destination.droppableId;
+      }
 
-    // inserta la tarea en su nueva columna
-    destColumn.splice(destination.index, 0, movedTask);
+      // Insertar la tarea en la columna de destino
+      tasksByState[destination.droppableId].splice(destination.index, 0, movedTask);
 
-    // Actualizar el estado de columnas
-    setTasks({
-      ...tasks,
-      [source.droppableId]: sourceColumn,
-      [destination.droppableId]: destColumn,
+      // Reconstruir la lista de tareas unificando todas las columnas
+      return estadosFijos.flatMap((estado) => tasksByState[estado]);
     });
   };
 
   return (
-
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="min-h-screen flex justify-center items-center">            
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-5xl">
-          {Object.keys(tasks).map((estado) => (
-            <Column key={estado} estado={estado} tasks={tasks[estado]} />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-5xl">
+        {estadosFijos.map((estado) => (
+          <Column key={estado} estado={estado} />
+        ))}
+      </div>
       </div>
     </DragDropContext>
   );
-}
+};
 
 export default TaskBoard;

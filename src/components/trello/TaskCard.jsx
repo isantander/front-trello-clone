@@ -1,9 +1,7 @@
-// TaskCard.jsx
-import { Draggable } from "@hello-pangea/dnd";
 import { FaTasks } from "react-icons/fa";
+import { Draggable } from '@hello-pangea/dnd';
 
-function TaskCard({ task, index }) {
-  console.log("taskId", task.id, "index", index);
+const TaskCard = ({ task, index }) => {
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided) => (
@@ -11,9 +9,8 @@ function TaskCard({ task, index }) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="p-4 bg-gray-800 rounded-lg flex items-center space-x-3 "
+          className="p-4 bg-gray-800 rounded-md flex items-center space-x-3 mb-3"
         >
-          
           <div className="w-full">
             <h3 className="text-sm lg:text-md font-bold text-white">{task.nombre}</h3>
             <p className="pl-2 text-sm text-gray-100 mb-4">{task.descripcion}</p>
@@ -25,6 +22,6 @@ function TaskCard({ task, index }) {
       )}
     </Draggable>
   );
-}
+};
 
 export default TaskCard;

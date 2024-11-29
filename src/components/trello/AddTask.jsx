@@ -1,10 +1,10 @@
-import { useTasks} from "../../context/TasksContext"
+import { useTaskContext} from "../../context/TasksContext"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AddTask = () => {
 
-    const { addTask} = useTasks();
+    const { addTask} = useTaskContext();
     const [newTaskTitle, setNewTaskTitle] = useState();
     const [newTaskDescription, setNewTaskDescription] = useState();  
     const navigate = useNavigate();

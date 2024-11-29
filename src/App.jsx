@@ -10,9 +10,9 @@ import ViewTask from "./components/trello/ViewTask";
 function App() {
   return (
     <>
-  <AuthProvider>
+   <AuthProvider>
     <TasksProvider>
-    <NavBar />
+      <NavBar />
       <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/taskboard" element={<TaskBoard />} />
@@ -20,7 +20,7 @@ function App() {
           <Route path="/view-task/:idTask" element={<ViewTask />} />
       </Routes>
     </TasksProvider>
-  </AuthProvider>
+   </AuthProvider> 
   </>
   );
 }

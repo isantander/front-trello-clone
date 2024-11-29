@@ -11,7 +11,6 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("e");
         if (username === "ivan" && password === "123") {
           toast.success("sesion iniciada");
           updateAuthData({ isLogged: true, userName: "Ivan Santander", nikName: "isantander" });
@@ -25,7 +24,6 @@ const Login = () => {
           navigate("/login"); 
         }
     };
-
 
     return (
         <div className="w-screen min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
