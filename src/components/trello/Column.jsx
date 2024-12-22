@@ -10,7 +10,7 @@ const Column = ({ estado }) => {
   const fetchTasks = async () => {
     try {
       // Por ahora la ip hardcodeada, luego va parametrizada
-      const response = await fetch('http://127.0.0.1:3000/tareas');
+      const response = await fetch('https://back-clone-trello.onrender.com/tareas');
       const data = await response.json();
       setTasks(data.data); 
     } catch (error) {

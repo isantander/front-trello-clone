@@ -1,24 +1,19 @@
-import { useTaskContext} from "../../context/TasksContext"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AddTask = () => {
-
-    const { addTask} = useTaskContext();
     const [newTaskTitle, setNewTaskTitle] = useState();
     const [newTaskDescription, setNewTaskDescription] = useState();  
     const navigate = useNavigate();
 
     const handleAddTask = () => {
-     //   const newTask = { nombre: newTaskTitle, descripcion: newTaskDescription};
-     //   addTask("pendiente", newTask); 
         const nuevaTarea = fetchback();
         navigate("/taskboard");
     };
    
     const fetchback = async (blog) => {
         // Por ahora hardcodeada la url backend
-        const response = await fetch(`http://127.0.0.1:3000/tareas`, {
+        const response = await fetch(`https://back-clone-trello.onrender.com/tareas`, {
           method: "POST",
           body: JSON.stringify(
             {
@@ -32,17 +27,15 @@ const AddTask = () => {
         });
 
         const data = await response.json();
+
         if (response.ok) {
           return data;
         } else {
           console.log(data);
-            return -2;
+            return -1;
         }
     };
     
-
-
-
     return (
         <div className="w-screen min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div className="relative py-3 sm:max-w-xs sm:mx-auto">
