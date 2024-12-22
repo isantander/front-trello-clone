@@ -5,22 +5,22 @@ import { useState, useEffect } from 'react';
 
 const Column = ({ estado }) => {
 
-  const [tasks, setTasks] = useState([]); // Estado para almacenar las tareas
+  const [tasks, setTasks] = useState([]); 
 
   const fetchTasks = async () => {
     try {
+      // Por ahora la ip hardcodeada, luego va parametrizada
       const response = await fetch('http://127.0.0.1:3000/tareas');
       const data = await response.json();
-      setTasks(data.data); // Actualiza el estado con las tareas obtenidas
+      setTasks(data.data); 
     } catch (error) {
       console.error('Error al obtener las tareas:', error);
     }
   };
 
-  // Llama a fetchTasks cuando el componente se monta
   useEffect(() => {
     fetchTasks();
-  }, []); // El segundo argumento [] asegura que esto se ejecute solo al montar
+  }, []); 
 
 
   const tasksFiltradas = tasks.filter((task) => task.estado === estado);

@@ -10,11 +10,39 @@ const AddTask = () => {
     const navigate = useNavigate();
 
     const handleAddTask = () => {
-        const newTask = { nombre: newTaskTitle, descripcion: newTaskDescription};
-        addTask("pendiente", newTask); 
+     //   const newTask = { nombre: newTaskTitle, descripcion: newTaskDescription};
+     //   addTask("pendiente", newTask); 
+        const nuevaTarea = fetchback();
         navigate("/taskboard");
     };
+   
+    const fetchback = async (blog) => {
+        // Por ahora hardcodeada la url backend
+        const response = await fetch(`http://127.0.0.1:3000/tareas`, {
+          method: "POST",
+          body: JSON.stringify(
+            {
+                nombre: newTaskTitle,
+                descripcion: newTaskDescription
+            }
+          ),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          return data;
+        } else {
+          console.log(data);
+            return -2;
+        }
+    };
     
+
+
+
     return (
         <div className="w-screen min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div className="relative py-3 sm:max-w-xs sm:mx-auto">
