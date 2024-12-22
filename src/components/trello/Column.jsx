@@ -1,31 +1,13 @@
 import React from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import TaskCard from './TaskCard';
-import { useState, useEffect } from 'react';
+import { useTaskContext } from '../../context/TasksContext';
 
 const Column = ({ estado }) => {
-
-  const [tasks, setTasks] = useState([]); // Estado para almacenar las tareas
-
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:3000/tareas');
-      const data = await response.json();
-      setTasks(data.data); // Actualiza el estado con las tareas obtenidas
-    } catch (error) {
-      console.error('Error al obtener las tareas:', error);
-    }
-  };
-
-  // Llama a fetchTasks cuando el componente se monta
-  useEffect(() => {
-    fetchTasks();
-  }, []); // El segundo argumento [] asegura que esto se ejecute solo al montar
-
-
+  const { tasks } = useTaskContext();
   const tasksFiltradas = tasks.filter((task) => task.estado === estado);
 
-  console.log("tareaas" , tasks);
+  console.log(tasks);
   return (
     <Droppable droppableId={estado}>
       {(provided) => (
