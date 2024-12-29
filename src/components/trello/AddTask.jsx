@@ -13,12 +13,13 @@ const AddTask = () => {
    
     const fetchback = async (blog) => {
         // Por ahora hardcodeada la url backend
-        const response = await fetch(`https://back-clone-trello.onrender.com/tareas`, {
+        const response = await fetch(`http://127.0.0.1:3000/tareas`, {
           method: "POST",
           body: JSON.stringify(
             {
                 nombre: newTaskTitle,
-                descripcion: newTaskDescription
+                descripcion: newTaskDescription,
+                estado: "pendiente"
             }
           ),
           headers: {
