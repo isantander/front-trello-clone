@@ -30,7 +30,7 @@ const TaskBoard = () => {
         fetchTasks();
     }, []);
 
-    // Manejar el evento de arrastrar y soltar.
+    // Manejar el evento de arrastrar y soltar, GRACIAS CHATGPT
     const handleDragEnd = async (result) => {
         if (!result.destination) return; // Si no hay destino, salir.
 
@@ -96,8 +96,8 @@ const TaskBoard = () => {
     // Renderizar el tablero de tareas.
     return (
         <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="min-h-screen flex justify-center items-center">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-5xl">
+            <div className="flex justify-center items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-5xl mt-10">
                     {estadosFijos.map((estado) => (
                         <Column
                             key={estado}
