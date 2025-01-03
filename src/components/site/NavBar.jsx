@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 const NavBar = () => {
     
     const [isOpen, setIsOpen] = useState(false);
-    const { authData, clearAuthData } = useContext(AuthContext);
+    const { isLogged, setIsLogged } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const toggleMenu = () => {
@@ -42,11 +42,11 @@ const NavBar = () => {
                         </button>
                     </div>
                     <div className={`lg:flex flex-col lg:flex-row ${isOpen ? 'block' : 'hidden'} lg:space-x-4 lg:mt-0 mt-4 flex flex-col items-center text-xl`}>
-                        {authData.isLogged && linksLogin.map((link) => (
+                        {isLogged && linksLogin.map((link) => (
                             <NavLink key={link.to} className="text-white  px-4 py-2 hover:text-orange-600 " to={`/${link.to}`}>{link.label}</NavLink>
                         ))}
-                        {authData.isLogged && <button onClick={handleClearData} className="text-white  px-4 py-2 hover:text-orange-600 ">Logout</button>}
-                        {!authData.isLogged && linksLogout.map((link) => (
+                        {isLogged && <button onClick={handleClearData} className="text-white  px-4 py-2 hover:text-orange-600 ">Logout</button>}
+                        {!isLogged && linksLogout.map((link) => (
                             <NavLink key={link.to} className="text-white  px-4 py-2 hover:text-orange-600 " to={`/${link.to}`}>{link.label}</NavLink>
                         ))}
 
@@ -54,9 +54,9 @@ const NavBar = () => {
                 </div>                
             </nav>
             <div className="bg-black opacity-35">
-                {authData.isLogged && (
+                {isLogged && (
                     <div className="text-white p-4 text-right">
-                        Bienvenido <strong>{authData.userName}</strong>
+                        Bienvenido <strong>xx</strong>
                     </div>
                 )}
             </div>

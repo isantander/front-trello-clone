@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { DragDropContext } from '@hello-pangea/dnd';
 import Column from './Column';
+import { AuthContext } from '../../context/AuthContext.jsx';
 
 const estadosFijos = ["pendiente", "proceso", "terminada"]; // Estados predefinidos.
 
@@ -8,16 +9,26 @@ const TaskBoard = () => {
     const [tasks, setTasks] = useState([]); // Estado global de las tareas.
     const [loading, setLoading] = useState(true); // Para mostrar un indicador de carga.
     const [error, setError] = useState(null); // Manejo de errores.
+    const URL_BACKEND = import.meta.env.VITE_URL_BACKEND;
+    const {accessToken} = useContext(AuthContext);
 
     const fetchTasks = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch('http://127.0.0.1:3000/tareas');
+            const response = await fetch(`${URL_BACKEND}/tareas`,{
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization' : accessToken
+                },
+            });
+
             if (!response.ok) {
                 throw new Error('Error al cargar las tareas.');
             }
             const data = await response.json();
+            console.log("data",data.data);
             setTasks(data.data);
         } catch (err) {
             setError(err.message);

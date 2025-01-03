@@ -3,31 +3,65 @@ import { createContext, useEffect, useState } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  
-    const [authData, setAuthData] = useState(() => {
 
-    const storedAuthData = localStorage.getItem("authData");
+    const URL_BACKEND = import.meta.env.VITE_URL_BACKEND;
 
-    return storedAuthData
-        ? JSON.parse(storedAuthData)
-        : { isLogged: false, userName: "", nikName: "" };
+    const [isLogged, setIsLogged] = useState(() => {
+        const store = localStorage.getItem("isLogged");
+        return store ? store : false;
     });
 
+    
+    const [ accessToken, setAccessToken ] = useState(
+        localStorage.getItem("accessToken")
+    );
+
+    const [ refreshToken, setRefreshToken ] = useState(
+        localStorage.getItem("refreshToken")
+    );
+    
     useEffect(() => {
-        localStorage.setItem("authData", JSON.stringify(authData));
-    }, [authData]);
-
-    const updateAuthData = (newData) => {
-        setAuthData((prevData) => ({ ...prevData, ...newData }));
-    };
-
-    const clearAuthData = () => {
-        setAuthData({ isLogged: false, userName: "", nikName: "" });
-        localStorage.removeItem("authData");
-    };
-
+        if (accessToken) {
+            localStorage.setItem("accessToken", accessToken);
+        } else {
+            localStorage.removeItem("accessToken");
+        }
+    }, [accessToken]);
+    
+    useEffect(() => {
+        if (refreshToken) {
+            localStorage.setItem("refreshToken", refreshToken);
+        }else {
+            localStorage.removeItem("refreshToken");
+        }
+    }, [refreshToken]);
+    
+    
+    // Login 
+    const loginBackend = async (email, password) => {
+        
+        const payload = {
+            email: email,
+            password: password
+        }
+        const response = await fetch(`${URL_BACKEND}/auth/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify( payload ),
+        });
+        
+        return response;
+    }
+    
+    useEffect(() => {
+        localStorage.setItem("isLogged", isLogged);
+    }, [isLogged]);
+    
     return (
-        <AuthContext.Provider value={{ authData, updateAuthData, clearAuthData }}>
+        // ver useMemo hook
+        <AuthContext.Provider value={{ isLogged, setIsLogged, accessToken, setAccessToken, refreshToken, setRefreshToken, loginBackend }}>
             {children}
         </AuthContext.Provider>
     );

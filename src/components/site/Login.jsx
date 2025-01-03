@@ -4,25 +4,27 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 
 const Login = () => {
-    const { authData, updateAuthData } = useContext(AuthContext);
-    const [username, setUsername] = useState("");
+    const { setIsLogged, setAccessToken, setRefreshToken, loginBackend} = useContext(AuthContext);
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (username === "ivan" && password === "123") {
-          toast.success("sesion iniciada");
-          updateAuthData({ isLogged: true, userName: "Ivan Santander", nikName: "isantander" });
-          navigate("/taskboard");    
-        }  else if (username === "javier" && password === "123") {
-            toast.success("sesion iniciada");
-            updateAuthData({ isLogged: true, userName: "Javier Latini", nikName: "jlatini" });
+
+        const response = await loginBackend(email, password);
+        const responseJson = await response.json();
+
+        if (response.ok) {
+            console.log("login", responseJson);
+            setAccessToken(responseJson.data.accessToken);
+            setRefreshToken(responseJson.data.refreshToken);
+            setIsLogged(true);
             navigate("/taskboard");    
-        } else {
-          toast.error("ingrese usuario y contraseña");
-          navigate("/login"); 
+        }else{
+            console.log("fail", responseJson);   
         }
+
     };
 
     return (
@@ -36,9 +38,9 @@ const Login = () => {
                         <div className="w-full flex flex-col gap-2">
                             <label className="font-semibold text-xs text-gray-400 ">Usuario</label>
                             <input className="border rounded-lg px-3 py-2 mb-5 text-sm w-full outline-none text-white dark:border-gray-500 dark:bg-gray-900" 
-                                   id="username"
-                                   placeholder="Username" 
-                                   onChange={(e) => setUsername(e.target.value)}/>
+                                   id="email"
+                                   placeholder="email" 
+                                   onChange={(e) => setEmail(e.target.value)}/>
                         </div>
                     </div>
                     <div className="w-full flex flex-col gap-2">
