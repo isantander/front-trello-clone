@@ -1,69 +1,42 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { DragDropContext } from '@hello-pangea/dnd';
 import Column from './Column';
 import { AuthContext } from '../../context/AuthContext.jsx';
+import { useTaskContext } from '../../context/TaskContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
-const estadosFijos = ["pendiente", "proceso", "terminada"]; // Estados predefinidos.
+const estadosFijos = ['pendiente', 'proceso', 'terminada'];
 
 const TaskBoard = () => {
-    const [tasks, setTasks] = useState([]); // Estado global de las tareas.
-    const [loading, setLoading] = useState(true); // Para mostrar un indicador de carga.
-    const [error, setError] = useState(null); // Manejo de errores.
-    const URL_BACKEND = import.meta.env.VITE_URL_BACKEND;
-    const {accessToken} = useContext(AuthContext);
-
-    const fetchTasks = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(`${URL_BACKEND}/tareas`,{
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization' : accessToken
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al cargar las tareas.');
-            }
-            const data = await response.json();
-            console.log("data",data.data);
-            setTasks(data.data);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    const { accessToken } = useContext(AuthContext);
+    const { tasks, setTasks, fetchTasks, updateTask, loading, error } = useTaskContext();
+    const navigate = useNavigate();
+    
     useEffect(() => {
-        fetchTasks();
-    }, []);
+        if (accessToken) {
+            fetchTasks(accessToken);
+        }else{
+            navigate("/login"); 
+        }
+    }, [accessToken]);
 
-    // Manejar el evento de arrastrar y soltar, GRACIAS CHATGPT
-    const handleDragEnd = async (result) => {
-        if (!result.destination) return; // Si no hay destino, salir.
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
 
         const { source, destination, draggableId } = result;
 
-        const nuevaColumna = destination.droppableId; // Nueva columna destino.
-        const nuevaPosicion = destination.index; // Índice en la nueva columna.
-
-        // Si no hay cambios, no hacemos nada.
         if (source.droppableId === destination.droppableId && source.index === destination.index) {
             return;
         }
 
-        // Obtener la tarea movida.
-        const tareaMovida = tasks.find((task) => task.id === draggableId);
+        const newColumn = destination.droppableId;
+        const newPosition = destination.index;
 
-        // Actualizar tareas localmente para feedback inmediato.
-        const nuevasTareas = tasks.map((task) => {
+        const updatedTasks = tasks.map((task) => {
             if (task.id === draggableId) {
-                return { ...task, estado: nuevaColumna, orden: nuevaPosicion };
+                return { ...task, estado: newColumn, orden: newPosition };
             }
-            if (task.estado === nuevaColumna && task.orden >= nuevaPosicion) {
+            if (task.estado === newColumn && task.orden >= newPosition) {
                 return { ...task, orden: task.orden + 1 };
             }
             if (task.estado === source.droppableId && task.orden > source.index) {
@@ -72,30 +45,11 @@ const TaskBoard = () => {
             return task;
         });
 
-        const tareasOrdenadas = nuevasTareas.sort((a, b) => a.orden - b.orden);
-        setTasks(tareasOrdenadas);
+        setTasks(updatedTasks.sort((a, b) => a.orden - b.orden));
 
-        // Enviar cambios al backend.
-        try {
-            console.log(`Moviendo tarea ${draggableId} a ${nuevaColumna} en la posición ${nuevaPosicion}`);
-            const response = await fetch(`http://127.0.0.1:3000/tareas/${draggableId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    estado: nuevaColumna,
-                    orden: nuevaPosicion,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al actualizar la tarea en el backend.');
-            }
-        } catch (error) {
-            console.error('Error al mover la tarea:', error);
-        }
+        updateTask(accessToken, draggableId, { estado: newColumn, orden: newPosition });
     };
 
-    // Renderizar mientras se cargan las tareas o si hay un error.
     if (loading) {
         return <div className="text-center text-white">Cargando tareas...</div>;
     }
@@ -104,18 +58,12 @@ const TaskBoard = () => {
         return <div className="text-center text-red-500">Error: {error}</div>;
     }
 
-    // Renderizar el tablero de tareas.
     return (
         <DragDropContext onDragEnd={handleDragEnd}>
             <div className="flex justify-center items-center">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-5xl mt-10">
                     {estadosFijos.map((estado) => (
-                        <Column
-                            key={estado}
-                            estado={estado}
-                            tasks={tasks}
-                            setTasks={setTasks}
-                        />
+                        <Column key={estado} estado={estado} tasks={tasks} setTasks={setTasks} />
                     ))}
                 </div>
             </div>

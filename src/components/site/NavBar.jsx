@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 const NavBar = () => {
     
     const [isOpen, setIsOpen] = useState(false);
-    const { isLogged, setIsLogged } = useContext(AuthContext);
+    const { isLogged, setIsLogged, setAccessToken, setRefreshToken } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const toggleMenu = () => {
@@ -19,10 +19,13 @@ const NavBar = () => {
 
     const linksLogout = [
         { to: 'login', label: 'Login' },
+        { to: 'register', label: 'Register' },
     ]
 
-    const handleClearData = () => {
-        clearAuthData();    
+    const handleLogOut = () => {
+        setIsLogged(false);
+        setAccessToken(null);
+        setRefreshToken(null);
         navigate("/login");
     }
 
@@ -45,7 +48,7 @@ const NavBar = () => {
                         {isLogged && linksLogin.map((link) => (
                             <NavLink key={link.to} className="text-white  px-4 py-2 hover:text-orange-600 " to={`/${link.to}`}>{link.label}</NavLink>
                         ))}
-                        {isLogged && <button onClick={handleClearData} className="text-white  px-4 py-2 hover:text-orange-600 ">Logout</button>}
+                        {isLogged && <button onClick={handleLogOut} className="text-white  px-4 py-2 hover:text-orange-600 ">Logout</button>}
                         {!isLogged && linksLogout.map((link) => (
                             <NavLink key={link.to} className="text-white  px-4 py-2 hover:text-orange-600 " to={`/${link.to}`}>{link.label}</NavLink>
                         ))}

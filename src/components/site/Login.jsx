@@ -1,18 +1,24 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 
 const Login = () => {
-    const { setIsLogged, setAccessToken, setRefreshToken, loginBackend} = useContext(AuthContext);
+    const { accessToken, setIsLogged, setAccessToken, setRefreshToken, login} = useContext(AuthContext);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+
+    useEffect(() => {
+        if (accessToken) {
+            navigate("/"); 
+        }
+    }, [accessToken]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const response = await loginBackend(email, password);
+        const response = await login(email, password);
         const responseJson = await response.json();
 
         if (response.ok) {
@@ -57,13 +63,7 @@ const Login = () => {
                                  onClick={(e) => handleSubmit(e)}
                         >Ingresar</button>
                     </div>
-                    <div className="text-white pt-3">
-                        USUARIOS:
-                        <ul className="list-disc list-inside text-sm pt-2 pl-4">
-                            <li>ivan/123</li>
-                            <li>javier/123</li>
-                        </ul>
-                    </div>
+
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useMemo } from "react";
 
 export const AuthContext = createContext();
 
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     
     
     // Login 
-    const loginBackend = async (email, password) => {
+    const login = async (email, password) => {
         
         const payload = {
             email: email,
@@ -55,13 +55,80 @@ export const AuthProvider = ({ children }) => {
         return response;
     }
     
+    const register = async (email, password, name) => {
+        
+        const payload = {
+            email: email,
+            name: name,
+            password: password
+        }
+
+        const response = await fetch(`${URL_BACKEND}/auth/registro`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify( payload ),
+        });
+        
+        return response;
+    }
+
+    const getNewToken2 = async (refreshToken) => {
+        
+        const response = await fetch(`${URL_BACKEND}/auth/actualizar-token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-refresh-token": refreshToken
+            },
+            body: JSON.stringify( ),
+        });
+        
+        return response;
+    }
+
+    const getNewToken = async (refreshToken) => {
+        try {
+            const response = await fetch(`${URL_BACKEND}/auth/actualizar-token`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-refresh-token": refreshToken
+                }
+            });
+        
+            if (!response.ok) {
+                throw new Error('Error al renovar el token');
+            }
+    
+            const responseJson = await response.json();
+            return responseJson.data.accessToken; // Devuelve solo el nuevo token
+        } catch (err) {
+            console.error('Error al renovar el token:', err);
+            throw err; // Rechaza la promesa para manejarlo fuera
+        }
+    };
+
+    // Memorizar el valor del contexto para mejorar el rendimiento
+    const authContextValue = useMemo(() => ({
+        isLogged,
+        setIsLogged,
+        accessToken,
+        setAccessToken,
+        refreshToken,
+        setRefreshToken,
+        login,
+        register,
+        getNewToken
+    }), [isLogged, accessToken, refreshToken]);
+    
     useEffect(() => {
         localStorage.setItem("isLogged", isLogged);
     }, [isLogged]);
     
     return (
-        // ver useMemo hook
-        <AuthContext.Provider value={{ isLogged, setIsLogged, accessToken, setAccessToken, refreshToken, setRefreshToken, loginBackend }}>
+        <AuthContext.Provider value={authContextValue}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,17 +1,22 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+import { useTaskContext} from "../../context/TaskContext"
 
 const AddTask = () => {
     const [newTaskTitle, setNewTaskTitle] = useState();
     const [newTaskDescription, setNewTaskDescription] = useState();  
+    const { accessToken } = useContext(AuthContext);
+    const { createTask } = useTaskContext();
+
     const navigate = useNavigate();
 
     const handleAddTask = () => {
-        const nuevaTarea = fetchback();
+        createTask(accessToken, newTaskTitle, newTaskDescription);
         navigate("/taskboard");
     };
    
-    const fetchback = async (blog) => {
+/*     const fetchback = async () => {
         // Por ahora hardcodeada la url backend
         const response = await fetch(`http://127.0.0.1:3000/tareas`, {
           method: "POST",
@@ -24,6 +29,7 @@ const AddTask = () => {
           ),
           headers: {
             "Content-Type": "application/json",
+            "Authorization": accessToken
           },
         });
 
@@ -35,7 +41,7 @@ const AddTask = () => {
           console.log(data);
             return -1;
         }
-    };
+    }; */
     
     return (
         <div className="w-screen flex items-center justify-center">
