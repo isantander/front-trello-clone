@@ -13,11 +13,15 @@ const TaskBoard = () => {
     const navigate = useNavigate();
     
     useEffect(() => {
-        if (accessToken) {
-            fetchTasks(accessToken);
-        }else{
-            navigate("/login"); 
-        }
+        const fetchTask = async() => {
+            if (accessToken) {
+                await fetchTasks(accessToken);
+            }else{
+                navigate("/login"); 
+            }
+        };
+
+        fetchTask();
     }, [accessToken]);
 
     const handleDragEnd = (result) => {

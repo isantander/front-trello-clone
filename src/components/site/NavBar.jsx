@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 const NavBar = () => {
     
     const [isOpen, setIsOpen] = useState(false);
-    const { isLogged, setIsLogged, setAccessToken, setRefreshToken } = useContext(AuthContext);
+    const { isLogged, setIsLogged, setAccessToken, setRefreshToken, setUsuarioId, usuarioId, userName } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const toggleMenu = () => {
@@ -15,6 +15,7 @@ const NavBar = () => {
     const linksLogin = [
         { to: 'add-task', label: 'Add Task' },
         { to: 'taskboard', label: 'Task Board' },
+        { to: `my-tasks/${usuarioId}`, label: 'My Task'}
     ]
 
     const linksLogout = [
@@ -24,10 +25,13 @@ const NavBar = () => {
 
     const handleLogOut = () => {
         setIsLogged(false);
+        setUsuarioId(false);
         setAccessToken(null);
         setRefreshToken(null);
         navigate("/login");
     }
+
+    console.log("aaaa", userName);
 
     return (
         <div>
@@ -52,14 +56,13 @@ const NavBar = () => {
                         {!isLogged && linksLogout.map((link) => (
                             <NavLink key={link.to} className="text-white  px-4 py-2 hover:text-orange-600 " to={`/${link.to}`}>{link.label}</NavLink>
                         ))}
-
                     </div>
                 </div>                
             </nav>
             <div className="bg-black opacity-35">
                 {isLogged && (
                     <div className="text-white p-4 text-right">
-                        Bienvenido <strong>xx</strong>
+                        Bienvenido <strong>{userName}</strong>
                     </div>
                 )}
             </div>

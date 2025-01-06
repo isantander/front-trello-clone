@@ -6,42 +6,15 @@ import { useTaskContext} from "../../context/TaskContext"
 const AddTask = () => {
     const [newTaskTitle, setNewTaskTitle] = useState();
     const [newTaskDescription, setNewTaskDescription] = useState();  
-    const { accessToken } = useContext(AuthContext);
+    const { accessToken, usuarioId } = useContext(AuthContext);
     const { createTask } = useTaskContext();
 
     const navigate = useNavigate();
-
     const handleAddTask = () => {
-        createTask(accessToken, newTaskTitle, newTaskDescription);
+        createTask(accessToken, newTaskTitle, newTaskDescription, usuarioId);
         navigate("/taskboard");
     };
    
-/*     const fetchback = async () => {
-        // Por ahora hardcodeada la url backend
-        const response = await fetch(`http://127.0.0.1:3000/tareas`, {
-          method: "POST",
-          body: JSON.stringify(
-            {
-                nombre: newTaskTitle,
-                descripcion: newTaskDescription,
-                estado: "pendiente"
-            }
-          ),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": accessToken
-          },
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          return data;
-        } else {
-          console.log(data);
-            return -1;
-        }
-    }; */
     
     return (
         <div className="w-screen flex items-center justify-center">
@@ -51,7 +24,6 @@ const AddTask = () => {
                         <div className="flex flex-col items-center justify-center gap-2 mb-8">
                             <p className="m-0 text-[16px] font-semibold dark:text-white">Agregar Tarea</p>
                         </div>
-                        {/* Campo Título */}
                         <div className="w-full flex flex-col gap-2">
                             <label className="font-semibold text-xs text-gray-400">Título</label>
                             <input
@@ -61,7 +33,6 @@ const AddTask = () => {
                             />
                         </div>
                     </div>
-                    {/* Campo Descripción */}
                     <div className="w-full flex flex-col gap-2">
                         <label className="font-semibold text-xs text-gray-400">Descripción</label>
                         <textarea
@@ -72,7 +43,6 @@ const AddTask = () => {
                             onChange={(e) => setNewTaskDescription(e.target.value)}
                         />
                     </div>
-                    {/* Botón Agregar */}
                     <div className="mt-5">
                         <button
                             className="py-2 px-8 bg-blue-500 hover:bg-blue-800 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg cursor-pointer select-none"

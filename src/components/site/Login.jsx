@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 
 const Login = () => {
-    const { accessToken, setIsLogged, setAccessToken, setRefreshToken, login} = useContext(AuthContext);
+    const { accessToken, setIsLogged, setAccessToken, setRefreshToken, login, setUsuarioId, setUserName} = useContext(AuthContext);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
@@ -22,9 +22,11 @@ const Login = () => {
         const responseJson = await response.json();
 
         if (response.ok) {
-            console.log("login", responseJson);
+            console.log("Login json", responseJson.data);
             setAccessToken(responseJson.data.accessToken);
             setRefreshToken(responseJson.data.refreshToken);
+            setUsuarioId(responseJson.data.usuarioId);
+            setUserName(responseJson.data.userName);
             setIsLogged(true);
             navigate("/taskboard");    
         }else{

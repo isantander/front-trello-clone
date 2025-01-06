@@ -5,46 +5,27 @@ const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
     const [tasks, setTasks] = useState([]);
+    const [task, setTask] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const { getNewToken, refreshToken, setAccessToken } = useContext(AuthContext);
 
     const URL_BACKEND = import.meta.env.VITE_URL_BACKEND;
 
-    const fetchTasks2 = async (accessToken) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(`${URL_BACKEND}/tareas`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': accessToken,
-                },
-            });
-
-                if (!response.ok) {
-                throw new Error('Error al cargar las tareas.');
-            } 
-
-            const data = await response.json();
-            setTasks(data.data);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }        
-    };
+    /**
+     * Implemento en cada llamaa a la API un bucle while
+     * para que en caso de que la respuesta no sea ok actualice el token y 
+     * envié nuevamente la petición esta vez con un troken válido.
+    */
 
     const fetchTasks = async (accessToken) => {
         setLoading(true);
         setError(null);
     
-        let attempts = 0; // Limitará a 2 intentos: uno inicial y uno tras renovar token
+        let intentos = 0; 
     
-        while (attempts < 2) {
+        while (intentos < 2) {
             try {
-                // Realiza la solicitud para obtener las tareas
                 const response = await fetch(`${URL_BACKEND}/tareas`, {
                     method: 'GET',
                     headers: {
@@ -53,65 +34,126 @@ export const TaskProvider = ({ children }) => {
                     },
                 });
     
-                // Si la respuesta es exitosa, parsea y asigna las tareas
                 if (response.ok) {
                     const data = await response.json();
-                    setTasks(data.data); // Asigna las tareas al estado
-                    return; // Finaliza la función, ya que todo fue exitoso
+                    setTasks(data.data); 
+                    return;
                 }
     
                 const responseJson = await response.json();
     
                 // Si el token expiró y estamos en el primer intento, renueva y reintenta
-                if (responseJson.code === "TOKEN_EXPIRED" && attempts === 0) {
-                    const newToken = await getNewToken(refreshToken); // Renueva el token
-                    setAccessToken(newToken); // Actualiza el token en tu almacenamiento
-                    accessToken = newToken; // Usa el nuevo token para el siguiente intento
-                    attempts++; // Incrementa el intento para evitar loops
-                    continue; // Reintenta con el nuevo token
+                if (responseJson.code === "TOKEN_EXPIRED" && intentos === 0) {
+                    const newToken = await getNewToken(refreshToken);
+                    setAccessToken(newToken);
+                    accessToken = newToken;
+                    intentos++;
+                    continue;
                 }
     
-                // Si es otro error, lo lanzamos para ser manejado en el bloque catch
                 throw new Error(responseJson.message || 'Error desconocido al cargar las tareas.');
     
             } catch (err) {
-                // Maneja cualquier error durante la solicitud o el procesamiento
                 setError(err.message);
                 console.error('Error en fetchTasks:', err);
-                return; // Finaliza la ejecución si algo falla
+                return;
             } finally {
-                setLoading(false); // Asegura que se detenga el estado de carga
+                setLoading(false); 
             }
         }
     
-        // Si llega aquí, significa que no pudo recuperar tareas tras varios intentos
+        // Si llegamos acá hay quilombo
         setError('No se pudieron cargar las tareas después de renovar el token.');
     };
     
-    const updateTask = async (accessToken, taskId, updatedTask) => {
-        try {
-            const response = await fetch(`${URL_BACKEND}/tareas/${taskId}`, {
-                method: 'PATCH',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': accessToken,
-                },
-                body: JSON.stringify(updatedTask),
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al actualizar la tarea.');
+    const fetchTaskId = async (accessToken, id) => {
+        setLoading(true);
+        setError(null);
+    
+        let intentos = 0; 
+    
+        while (intentos < 2) {
+            try {
+                const response = await fetch(`${URL_BACKEND}/tareas/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken,
+                    },
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setTask(data.data); 
+                    return;
+                }
+    
+                const responseJson = await response.json();
+    
+                if (responseJson.code === "TOKEN_EXPIRED" && intentos === 0) {
+                    const newToken = await getNewToken(refreshToken);
+                    setAccessToken(newToken);
+                    accessToken = newToken;
+                    intentos++;
+                    continue;
+                }
+    
+                throw new Error(responseJson.message || 'Error desconocido al cargar las tareas.');
+    
+            } catch (err) {
+                setError(err.message);
+                console.error('Error en fetchTasks:', err);
+                return;
+            } finally {
+                setLoading(false); 
             }
-        } catch (err) {
-            console.error('Error al actualizar la tarea:', err);
         }
+    
+        // Si llegamos acá hay quilombo
+        setError('No se pudieron cargar las tareas después de renovar el token.');
     };
 
-    const createTask = async (accessToken, taskTitle, taskDescription) => {
-        let attempts = 0;
+    const updateTask = async (accessToken, taskId, updatedTask) => {
+        let intentos = 0;
+        while (intentos < 2) { 
+            try {
+                console.log("acaaa en updateTask en Context");
+                const response = await fetch(`${URL_BACKEND}/tareas/${taskId}`, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken,
+                    },
+                    body: JSON.stringify(updatedTask),
+                });
+
+                if (response.ok) {
+                    return;
+                }
+
+                const responseJson = await response.json();
     
-        // SOlo 2 intentos para evitar un bucle infinito
-        while (attempts < 2) { 
+                if (responseJson.code === "TOKEN_EXPIRED" && intentos === 0) {
+                    accessToken = await getNewToken(refreshToken);
+                    setAccessToken(accessToken); 
+                    intentos++;
+                    continue;
+                }else{
+                    console.log("en el else", responseJson);
+                }
+
+            } catch (err) {
+                console.error('Error al actualizar la tarea:', err);
+            }
+        }
+
+        setError('No se pudieron cargar las tareas después de renovar el token.');
+
+    };
+
+    const createTask = async (accessToken, taskTitle, taskDescription, usuarioId) => {
+        let intentos = 0;
+        while (intentos < 2) { 
             try {
                 const response = await fetch(`${URL_BACKEND}/tareas`, {
                     method: 'POST',
@@ -123,29 +165,28 @@ export const TaskProvider = ({ children }) => {
                         nombre: taskTitle,
                         descripcion: taskDescription,
                         estado: 'pendiente',
+                        autor: usuarioId
                     }),
                 });
     
                 if (response.ok) {
                     fetchTasks(accessToken);
-                    return await response.json(); // Retorna si todo va bien
+                    return await response.json();
                 }
     
                 const responseJson = await response.json();
     
-                if (responseJson.code === "TOKEN_EXPIRED" && attempts === 0) {
-                    // Si el token expiró y es el primer intento
+                if (responseJson.code === "TOKEN_EXPIRED" && intentos === 0) {
                     accessToken = await getNewToken(refreshToken);
-                    setAccessToken(accessToken); // Actualiza el token en tu almacenamiento
-                    attempts++; // Incrementa el intento para evitar loops
-                    continue; // Reintenta la operación con el nuevo token
+                    setAccessToken(accessToken); 
+                    intentos++;
+                    continue;
                 }
     
-                // Si no es un error manejable, lanza un error
                 throw new Error(responseJson.message || 'Error desconocido al crear la tarea');
             } catch (err) {
                 console.error('Error en createTask:', err);
-                throw err; // Propaga el error para manejarlo donde se llame
+                throw err; 
             }
         }
     
@@ -153,14 +194,91 @@ export const TaskProvider = ({ children }) => {
     };
 
 
+    const deleteTask = async(accessToken, taskId) => {
+        let intentos = 0;
+    
+        while (intentos < 2) { 
+            try {
+                const response = await fetch(`${URL_BACKEND}/tareas/${taskId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken,
+                    },
+                });
+    
+                if (response.ok) {
+                    return response;
+                }
+    
+                const responseJson = await response.json();
+    
+                if (responseJson.code === "TOKEN_EXPIRED" && intentos === 0) {
+                    accessToken = await getNewToken(refreshToken);
+                    setAccessToken(accessToken); 
+                    intentos++;
+                    continue;
+                }
+    
+                throw new Error(responseJson.message || 'Error desconocido al eliminar la tarea');
+            } catch (err) {
+                console.error('Error en deleteTask:', err);
+                throw err; 
+            }
+        }
+    
+        throw new Error('No se pudo eliminar la tarea tras varios intentos');
+    }
+
+    const fetchTaskByAutor = async (accessToken, autor) => {
+        let intentos = 0;
+        
+        while (intentos < 2) { 
+            try {
+                const response = await fetch(`${URL_BACKEND}/tareas/autor/${autor}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken,
+                    },
+                });
+    
+                if (response.ok) {
+                    return response;
+                }
+    
+                const responseJson = await response.json();
+    
+                if (responseJson.code === "TOKEN_EXPIRED" && intentos === 0) {
+                    accessToken = await getNewToken(refreshToken);
+                    setAccessToken(accessToken); 
+                    intentos++;
+                    continue;
+                }
+    
+                throw new Error(responseJson.message || 'Error desconocido al eliminar la tarea');
+            } catch (err) {
+                console.error('Error en deleteTask:', err);
+                throw err; 
+            }
+        }
+    
+        throw new Error('No se pudo cargar las tareas del usuario tras varios intentos');
+    }
+
     const taskContextValue = useMemo(() => ({ 
+        task,
         tasks, 
         setTasks, 
-        fetchTasks, 
+        setTask,
+        fetchTasks,
+        fetchTaskId, 
         updateTask,
         createTask,
+        deleteTask,
         loading, 
-        error }), [tasks, loading, error]);
+        fetchTaskByAutor,
+        error }), [task, tasks, loading, error]);
     
     return (
         <TaskContext.Provider value={ taskContextValue}>

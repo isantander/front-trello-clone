@@ -10,14 +10,22 @@ export const AuthProvider = ({ children }) => {
         const store = localStorage.getItem("isLogged");
         return store ? store : false;
     });
-
+    
     
     const [ accessToken, setAccessToken ] = useState(
         localStorage.getItem("accessToken")
     );
-
+    
     const [ refreshToken, setRefreshToken ] = useState(
         localStorage.getItem("refreshToken")
+    );
+    
+    const [usuarioId, setUsuarioId] = useState(
+        localStorage.getItem("usuarioId")
+    );
+    
+    const [userName, setUserName] = useState(
+        localStorage.getItem("userName")
     );
     
     useEffect(() => {
@@ -36,6 +44,21 @@ export const AuthProvider = ({ children }) => {
         }
     }, [refreshToken]);
     
+    useEffect(() => {
+        if (usuarioId) {
+            localStorage.setItem("usuarioId", usuarioId);
+        } else {
+            localStorage.removeItem("usuarioId");
+        }
+    }, [usuarioId]);
+
+    useEffect(() => {
+        if (userName) {
+            localStorage.setItem("userName", userName);
+        } else {
+            localStorage.removeItem("userName");
+        }
+    }, [userName]);
     
     // Login 
     const login = async (email, password) => {
@@ -74,20 +97,6 @@ export const AuthProvider = ({ children }) => {
         return response;
     }
 
-    const getNewToken2 = async (refreshToken) => {
-        
-        const response = await fetch(`${URL_BACKEND}/auth/actualizar-token`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-refresh-token": refreshToken
-            },
-            body: JSON.stringify( ),
-        });
-        
-        return response;
-    }
-
     const getNewToken = async (refreshToken) => {
         try {
             const response = await fetch(`${URL_BACKEND}/auth/actualizar-token`, {
@@ -103,10 +112,10 @@ export const AuthProvider = ({ children }) => {
             }
     
             const responseJson = await response.json();
-            return responseJson.data.accessToken; // Devuelve solo el nuevo token
+            return responseJson.data.accessToken; 
         } catch (err) {
             console.error('Error al renovar el token:', err);
-            throw err; // Rechaza la promesa para manejarlo fuera
+            throw err; 
         }
     };
 
@@ -120,8 +129,12 @@ export const AuthProvider = ({ children }) => {
         setRefreshToken,
         login,
         register,
-        getNewToken
-    }), [isLogged, accessToken, refreshToken]);
+        getNewToken,
+        setUsuarioId,
+        setUserName,
+        usuarioId,
+        userName
+    }), [isLogged, userName, accessToken, refreshToken, usuarioId]);
     
     useEffect(() => {
         localStorage.setItem("isLogged", isLogged);
